@@ -21,56 +21,36 @@ def index():
 def download():
     url = request.form['url']
     option = request.form['option']
-    video_format = request.form['format']  # mp3 / mp4 / mp4_hd / webm
-
-    if option == 'audio':
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '320',
-            }],
-            'ffmpeg_location': ffmpeg_path,
-            'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-        }
-
-    else:
-        # Video (mp4, mp4_hd, webm)
-        if video_format == 'mp4':
-            ydl_opts = {
-                'format': 'bestvideo[ext=mp4][height<=720][tbr<=2500]+bestaudio[ext=m4a]/best[ext=mp4][height<=720]',
-                'ffmpeg_location': ffmpeg_path,
-                'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-                'postprocessors': [{
-                    'key': 'FFmpegVideoConvertor',
-                    'preferedformat': 'mp4'
-                }],
-            }
-        elif video_format == 'mp4_hd':
-            ydl_opts = {
-                'format': 'bestvideo[ext=mp4][height<=1080][tbr>2500]+bestaudio[ext=m4a]/best[ext=mp4][height<=1080]',
-                'ffmpeg_location': ffmpeg_path,
-                'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-                'postprocessors': [{
-                    'key': 'FFmpegVideoConvertor',
-                    'preferedformat': 'mp4'
-                }],
-            }
-        elif video_format == 'webm':
-            ydl_opts = {
-                'format': 'bestvideo[ext=webm][height<=1080]+bestaudio/best',
-                'ffmpeg_location': ffmpeg_path,
-                'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-            }
 
     try:
-        with YoutubeDL(ydl_opts) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
-
-            if option == 'audio':
+        if option == 'audio':
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '320',
+                }],
+                'ffmpeg_location': ffmpeg_path,
+                'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
+            }
+            with YoutubeDL(ydl_opts) as ydl:
+                info_dict = ydl.extract_info(url, download=True)
                 filename = ydl.prepare_filename(info_dict).replace('.webm', '.mp3').replace('.m4a', '.mp3')
-            else:
+
+        else:
+            # Siempre intentar descargar con alta calidad (bitrate > 2500)
+            ydl_opts = {
+                'format': 'bestvideo[ext=mp4][height<=1080][tbr>2500]+bestaudio[ext=m4a]/best',
+                'ffmpeg_location': ffmpeg_path,
+                'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
+                'postprocessors': [{
+                    'key': 'FFmpegVideoConvertor',
+                    'preferedformat': 'mp4'
+                }],
+            }
+            with YoutubeDL(ydl_opts) as ydl:
+                info_dict = ydl.extract_info(url, download=True)
                 filename = ydl.prepare_filename(info_dict)
 
         return send_file(filename, as_attachment=True)
