@@ -39,15 +39,13 @@ def download():
         # Aquí seleccionamos la mejor calidad de video disponible hasta 1080p
         if video_format == 'mp4':
             ydl_opts = {
-                'format': 'bv*[ext=mp4][height<=1080]+ba[ext=m4a]/bestvideo+bestaudio',
+                'format': 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-                'merge_output_format': 'mp4',
+                'merge_output_format': 'mp4',  # Esto le dice a yt-dlp que use ffmpeg para unir
                 'postprocessors': [{
                     'key': 'FFmpegMerger'
                 }],
-                'noplaylist': True,
-                'quiet': True,
             }
 
         elif video_format == 'webm':
