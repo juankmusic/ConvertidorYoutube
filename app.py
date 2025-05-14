@@ -1,15 +1,10 @@
 from flask import Flask, render_template, request, send_file, flash
 from yt_dlp import YoutubeDL
 import os
-import subprocess
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Ruta a ffmpeg
-ffmpeg_path = '/usr/bin/ffmpeg'
-
-# Carpeta de descargas
 download_folder = 'downloads'
 if not os.path.exists(download_folder):
     os.makedirs(download_folder)
@@ -24,64 +19,43 @@ def download():
     option = request.form['option']
     video_format = request.form['format']  # mp3 / mp4 / mp4_hd / webm
 
-    if option == 'audio':
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '320',
-            }],
-            'ffmpeg_location': ffmpeg_path,
-            'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-        }
-
-    else:
-        # Configuraciones comunes para formatos de video
-        if video_format in ['mp4', 'mp4_hd']:
-            ydl_opts = {
-                'format': 'bestvideo[ext=mp4][height<=1080][tbr>2500]+bestaudio[ext=m4a]/best',
-                'ffmpeg_location': ffmpeg_path,
-                'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-                'postprocessors': [{
-                    'key': 'FFmpegVideoConvertor',
-                    'preferedformat': 'mp4'
-                }],
-            }
-        elif video_format == 'webm':
-            ydl_opts = {
-                'format': 'bestvideo[ext=webm][height<=1080]+bestaudio/best',
-                'ffmpeg_location': ffmpeg_path,
-                'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-            }
-
     try:
+        if option == 'audio':
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'postprocessors': [{
+                    'key': 'FFmpegExtractAudio',
+                    'preferredcodec': 'mp3',
+                    'preferredquality': '320',
+                }],
+                'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
+            }
+
+        else:
+            if video_format == 'mp4':
+                ydl_opts = {
+                    'format': 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best',
+                    'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
+                }
+            elif video_format == 'mp4_hd':
+                ydl_opts = {
+                    'format': 'bestvideo[ext=mp4][height<=1080][tbr>2500]+bestaudio[ext=m4a]/best',
+                    'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
+                }
+            elif video_format == 'webm':
+                ydl_opts = {
+                    'format': 'bestvideo[ext=webm][height<=1080]+bestaudio/best',
+                    'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
+                }
+            else:
+                flash('Formato no soportado.', 'error')
+                return render_template('index.html')
+
         with YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
-
+            filename = ydl.prepare_filename(info_dict)
             if option == 'audio':
-                filename = ydl.prepare_filename(info_dict).replace('.webm', '.mp3').replace('.m4a', '.mp3')
-            else:
-                filename = ydl.prepare_filename(info_dict)
-
-                if video_format == 'mp4_hd':
-                    base, _ = os.path.splitext(filename)
-                    output_path = f"{base}_highbitrate.mp4"
-
-                    # Optimización del comando ffmpeg para reducir el bitrate y la carga
-                    command = [
-                        ffmpeg_path,
-                        '-i', filename,
-                        '-b:v', '2500k',          # Bitrate reducido
-                        '-maxrate', '2500k',      # Maximo bitrate
-                        '-bufsize', '5000k',      # Tamaño de buffer ajustado
-                        '-c:a', 'aac',            # Recodificación de audio
-                        '-loglevel', 'debug',     # Para más detalles de los logs
-                        output_path
-                    ]
-
-                    subprocess.run(command, check=True)
-                    filename = output_path
+                filename = filename.rsplit('.', 1)[0] + '.mp3'
 
         return send_file(filename, as_attachment=True)
 
