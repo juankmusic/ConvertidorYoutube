@@ -71,26 +71,18 @@ def download():
                     output_path = f"{base}_highbitrate.mp4"
 
                     command = [
-                        ffmpeg_path,
+                        'ffmpeg', 
                         '-i', filename,
-                        '-b:v', '5000k',
-                        '-maxrate', '5000k',
-                        '-bufsize', '10000k',
-                        '-preset', 'veryfast',
-                        '-c:a', 'copy',
+                        '-c:v', 'libx264',
+                        '-b:v', '4500k',
+                        '-c:a', 'aac',
+                        '-b:a', '128k',
+                        '-preset', 'fast',
+                        '-crf', '23',
                         output_path
                     ]
-                    # Ejecutar y capturar el log de ffmpeg
-                    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    stdout, stderr = process.communicate()
 
-                    # Registrar salida y errores de ffmpeg
-                    print(stdout.decode())
-                    print(stderr.decode())
-
-                    if process.returncode != 0:
-                        flash(f"Error en la conversión: {stderr.decode()}", 'error')
-                        return render_template('index.html')
+                    
 
                     subprocess.run(command, check=True)
                     filename = output_path
