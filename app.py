@@ -71,7 +71,7 @@ def download():
                     output_path = f"{base}_highbitrate.mp4"
 
                     command = [
-                        os.path.join(ffmpeg_path, 'ffmpeg.exe'),
+                        ffmpeg_path,
                         '-i', filename,
                         '-b:v', '5000k',
                         '-maxrate', '5000k',
@@ -83,6 +83,7 @@ def download():
 
                     subprocess.run(command, check=True)
                     filename = output_path
+
 
 
         return send_file(filename, as_attachment=True)
