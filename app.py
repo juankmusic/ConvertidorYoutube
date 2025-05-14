@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, send_file, flash
 from yt_dlp import YoutubeDL
 import os
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -21,38 +22,39 @@ def index():
 def download():
     url = request.form['url']
     option = request.form['option']
-    video_format = request.form['format']  # Obtenemos el formato elegido por el usuario
+    video_format = request.form['format']  # mp3 / mp4 / mp4_hd / webm
 
-    # Configuración de yt-dlp para descargar según la opción elegida
     if option == 'audio':
         ydl_opts = {
             'format': 'bestaudio/best',
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
-                'preferredquality': '320',  # Cambiar calidad del mp3
+                'preferredquality': '320',
             }],
             'ffmpeg_location': ffmpeg_path,
             'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
         }
+
     else:
-        # Aquí seleccionamos la mejor calidad de video disponible hasta 1080p
-        if video_format == 'mp4':
+        # Configuraciones comunes para formatos de video
+        if video_format in ['mp4', 'mp4_hd']:
             ydl_opts = {
                 'format': 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-                'merge_output_format': 'mp4',  # Esto le dice a yt-dlp que use ffmpeg para unir
                 'postprocessors': [{
-                    'key': 'FFmpegMerger'
+                    'key': 'FFmpegVideoConvertor',
+                    'preferedformat': 'mp4'
                 }],
+                
             }
-
         elif video_format == 'webm':
             ydl_opts = {
-                'format': 'bestvideo[ext=webm][height<=1080]+bestaudio/best',  # Solo hasta 1080p en webm
+                'format': 'bestvideo[ext=webm][height<=1080]+bestaudio/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
+                
             }
 
     try:
@@ -60,15 +62,33 @@ def download():
             info_dict = ydl.extract_info(url, download=True)
 
             if option == 'audio':
-                filename = os.path.join(download_folder, f"{info_dict['title']}.mp3")
+                filename = ydl.prepare_filename(info_dict).replace('.webm', '.mp3').replace('.m4a', '.mp3')
             else:
-                filename = os.path.join(download_folder, f"{info_dict['title']}.{video_format}")  # Utilizamos el formato elegido
+                filename = ydl.prepare_filename(info_dict)
+
+                if video_format == 'mp4_hd':
+                    base, _ = os.path.splitext(filename)
+                    output_path = f"{base}_highbitrate.mp4"
+
+                    command = [
+                        os.path.join(ffmpeg_path, 'ffmpeg.exe'),
+                        '-i', filename,
+                        '-b:v', '5000k',
+                        '-maxrate', '5000k',
+                        '-bufsize', '10000k',
+                        '-preset', 'veryfast',
+                        '-c:a', 'copy',
+                        output_path
+                    ]
+
+                    subprocess.run(command, check=True)
+                    filename = output_path
+
 
         return send_file(filename, as_attachment=True)
 
     except Exception as e:
-        flash(f"Error: {str(e)}", 'error')
-        print("Error en descarga:", e)
+        flash("Hubo un problema al descargar o enviar el archivo.", 'error')
         return render_template('index.html')
 
 if __name__ == '__main__':

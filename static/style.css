@@ -66,3 +66,18 @@ label {
     font-size: 0.9rem;
 }
 
+/* Estilo para el pie de página */
+footer {
+    text-align: center;
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+}
