@@ -47,14 +47,12 @@ def download():
                     'key': 'FFmpegVideoConvertor',
                     'preferedformat': 'mp4'
                 }],
-                
             }
         elif video_format == 'webm':
             ydl_opts = {
                 'format': 'bestvideo[ext=webm][height<=1080]+bestaudio/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-                
             }
 
     try:
@@ -70,33 +68,28 @@ def download():
                     base, _ = os.path.splitext(filename)
                     output_path = f"{base}_highbitrate.mp4"
 
+                    # Optimización del comando ffmpeg para reducir el bitrate y la carga
                     command = [
-                        'ffmpeg', 
+                        ffmpeg_path,
                         '-i', filename,
-                        '-c:v', 'libx264',
-                        '-b:v', '4500k',
-                        '-c:a', 'aac',
-                        '-b:a', '128k',
-                        '-preset', 'fast',
-                        '-crf', '23',
+                        '-b:v', '4500k',         # Ajuste de bitrate a 4500 kbps
+                        '-maxrate', '4500k',     # Maximo bitrate
+                        '-bufsize', '9000k',     # Tamaño de buffer optimizado
+                        '-preset', 'fast',       # Menor carga en Railway
+                        '-c:a', 'copy',          # Copiar audio sin re-codificar
                         output_path
                     ]
-
-                    
 
                     subprocess.run(command, check=True)
                     filename = output_path
 
-
-
         return send_file(filename, as_attachment=True)
 
     except Exception as e:
-        flash("Hubo un problema al descargar o enviar el archivo.", 'error')
+        flash(f"Hubo un problema al descargar o enviar el archivo: {str(e)}", 'error')
         return render_template('index.html')
 
 if __name__ == '__main__':
     import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
-
