@@ -39,7 +39,7 @@ def download():
         # Video (mp4, mp4_hd, webm)
         if video_format == 'mp4':
             ydl_opts = {
-                'format': 'bestvideo[ext=mp4][height<=720][tbr<=2500]+bestaudio[ext=m4a]/best',
+                'format': 'bestvideo[ext=mp4][height<=720][tbr<=2500]+bestaudio[ext=m4a]/best[ext=mp4][height<=720]',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
                 'postprocessors': [{
@@ -49,7 +49,7 @@ def download():
             }
         elif video_format == 'mp4_hd':
             ydl_opts = {
-                'format': 'bestvideo[ext=mp4][height<=1080][tbr>2500]+bestaudio[ext=m4a]/best',
+                'format': 'bestvideo[ext=mp4][height<=1080][tbr>2500]+bestaudio[ext=m4a]/best[ext=mp4][height<=1080]',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
                 'postprocessors': [{
