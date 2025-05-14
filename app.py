@@ -40,7 +40,7 @@ def download():
         # Configuraciones comunes para formatos de video
         if video_format in ['mp4', 'mp4_hd']:
             ydl_opts = {
-                'format': 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best',
+                'format': 'bestvideo[ext=mp4][height<=1080][tbr>2500]+bestaudio[ext=m4a]/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
                 'postprocessors': [{
