@@ -80,6 +80,17 @@ def download():
                         '-c:a', 'copy',
                         output_path
                     ]
+                    # Ejecutar y capturar el log de ffmpeg
+                    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    stdout, stderr = process.communicate()
+
+                    # Registrar salida y errores de ffmpeg
+                    print(stdout.decode())
+                    print(stderr.decode())
+
+                    if process.returncode != 0:
+                        flash(f"Error en la conversión: {stderr.decode()}", 'error')
+                        return render_template('index.html')
 
                     subprocess.run(command, check=True)
                     filename = output_path
