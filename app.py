@@ -72,11 +72,12 @@ def download():
                     command = [
                         ffmpeg_path,
                         '-i', filename,
-                        '-b:v', '4500k',         # Ajuste de bitrate a 4500 kbps
-                        '-maxrate', '4500k',     # Maximo bitrate
-                        '-bufsize', '9000k',     # Tamaño de buffer optimizado
-                        '-preset', 'fast',       # Menor carga en Railway
-                        '-c:a', 'copy',          # Copiar audio sin re-codificar
+                        '-b:v', '4000k',          # Ajustamos el bitrate a 4000kbps
+                        '-maxrate', '4000k',      # Maximo bitrate
+                        '-bufsize', '8000k',      # Tamaño de buffer ajustado
+                        '-preset', 'medium',      # Ajuste del preset para equilibrio entre velocidad y calidad
+                        '-c:a', 'copy',           # Copiar audio sin re-codificar
+                        '-loglevel', 'debug',     # Para obtener más detalles de los logs
                         output_path
                     ]
 
