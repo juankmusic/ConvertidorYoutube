@@ -5,10 +5,7 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Ruta a ffmpeg
 ffmpeg_path = '/usr/bin/ffmpeg'
-
-# Carpeta de descargas
 download_folder = 'downloads'
 if not os.path.exists(download_folder):
     os.makedirs(download_folder)
@@ -21,8 +18,7 @@ def index():
 def download():
     url = request.form['url']
     option = request.form['option']
-    resolution = request.form.get('resolution', '1080p')  # 1080p, 2k, 4k
-
+    resolution = request.form.get('resolution', '1080')  # Default to 1080p
     try:
         if option == 'audio':
             ydl_opts = {
@@ -35,20 +31,11 @@ def download():
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
             }
-            with YoutubeDL(ydl_opts) as ydl:
-                info_dict = ydl.extract_info(url, download=True)
-                filename = ydl.prepare_filename(info_dict).replace('.webm', '.mp3').replace('.m4a', '.mp3')
-
         else:
-            height_map = {
-                '1080p': '1080',
-                '2k': '1440',
-                '4k': '2160',
-            }
-            max_height = height_map.get(resolution, '1080')
-
+            height = int(resolution)
+            # Descarga solo si existe exactamente la resolución solicitada
             ydl_opts = {
-                'format': f'bestvideo[ext=mp4][height<={max_height}]+bestaudio[ext=m4a]/best',
+                'format': f'bestvideo[ext=mp4][height={height}]+bestaudio[ext=m4a]/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
                 'postprocessors': [{
@@ -56,16 +43,21 @@ def download():
                     'preferedformat': 'mp4'
                 }],
             }
-            with YoutubeDL(ydl_opts) as ydl:
-                info_dict = ydl.extract_info(url, download=True)
+
+        with YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+            if option == 'audio':
+                filename = ydl.prepare_filename(info_dict).replace('.webm', '.mp3').replace('.m4a', '.mp3')
+            else:
                 filename = ydl.prepare_filename(info_dict)
 
         return send_file(filename, as_attachment=True)
 
     except Exception as e:
-        flash(f"Hubo un problema al descargar o enviar el archivo: {str(e)}", 'error')
+        flash(f"No se pudo descargar el video con la resolución {resolution}p. Intenta con otra resolución o revisa el enlace. Detalle: {str(e)}", 'error')
         return render_template('index.html')
 
 if __name__ == '__main__':
+    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
