@@ -5,7 +5,10 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
+# Ruta a ffmpeg
 ffmpeg_path = '/usr/bin/ffmpeg'
+
+# Carpeta de descargas
 download_folder = 'downloads'
 if not os.path.exists(download_folder):
     os.makedirs(download_folder)
@@ -18,7 +21,7 @@ def index():
 def download():
     url = request.form['url']
     option = request.form['option']
-    resolution = request.form.get('resolution', '1080')  # Default to 1080p
+
     try:
         if option == 'audio':
             ydl_opts = {
@@ -32,10 +35,9 @@ def download():
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
             }
         else:
-            height = int(resolution)
-            # Descarga solo si existe exactamente la resolución solicitada
+            # Descargar mejor video y mejor audio disponibles
             ydl_opts = {
-                'format': f'bestvideo[ext=mp4][height={height}]+bestaudio[ext=m4a]/best',
+                'format': 'bestvideo+bestaudio/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
                 'postprocessors': [{
@@ -54,7 +56,7 @@ def download():
         return send_file(filename, as_attachment=True)
 
     except Exception as e:
-        flash(f"No se pudo descargar el video con la resolución {resolution}p. Intenta con otra resolución o revisa el enlace. Detalle: {str(e)}", 'error')
+        flash(f"Hubo un problema al descargar o enviar el archivo: {str(e)}", 'error')
         return render_template('index.html')
 
 if __name__ == '__main__':
