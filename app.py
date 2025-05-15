@@ -41,7 +41,7 @@ def download():
         else:
             # Siempre intentar descargar con alta calidad (bitrate > 2500)
             ydl_opts = {
-                'format': 'bestvideo[ext=mp4][height<=1080][tbr>1500]+bestaudio[ext=m4a]/best',
+                'format': 'bestvideo[ext=mp4][height<=1080][tbr<=3000][tbr>=1500]+bestaudio[ext=m4a]/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
                 'postprocessors': [{
