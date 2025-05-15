@@ -6,7 +6,7 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
 # Ruta a ffmpeg
-ffmpeg_path = '/usr/bin/ffmpeg'
+ffmpeg_path = '/usr/bin/ffmpeg'  # Cambia a tu ruta si estás en Windows
 
 # Carpeta de descargas
 download_folder = 'downloads'
@@ -35,23 +35,21 @@ def download():
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
             }
         else:
-            # Descargar mejor video y mejor audio disponibles
+            # Descargar siempre el mejor video + mejor audio en MP4
             ydl_opts = {
-                'format': 'bestvideo+bestaudio/best',
+                'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
-                'postprocessors': [{
-                    'key': 'FFmpegVideoConvertor',
-                    'preferedformat': 'mp4'
-                }],
+                'merge_output_format': 'mp4',
             }
 
         with YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(url, download=True)
+            filename = ydl.prepare_filename(info_dict)
+
+            # Si se convierte a audio, cambiar extensión final
             if option == 'audio':
-                filename = ydl.prepare_filename(info_dict).replace('.webm', '.mp3').replace('.m4a', '.mp3')
-            else:
-                filename = ydl.prepare_filename(info_dict)
+                filename = filename.replace('.webm', '.mp3').replace('.m4a', '.mp3')
 
         return send_file(filename, as_attachment=True)
 
@@ -60,6 +58,4 @@ def download():
         return render_template('index.html')
 
 if __name__ == '__main__':
-    import os
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True)
