@@ -2,33 +2,24 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertidor de YouTube - JM</title>
+    <title>Convertidor de YouTube</title>
     <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Convertidor de YouTube</h1>
-            <p>Descarga tus videos o audios de YouTube con facilidad</p>
-        </header>
+        <h1>Convertidor de YouTube</h1>
+        <form method="POST" action="/download">
+            <label for="url">URL del video:</label>
+            <input type="url" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
 
-        <form method="POST" action="/download" class="form">
-            <label for="url">URL del Video o Audio:</label>
-            <input type="url" id="url" name="url" placeholder="https://www.youtube.com/watch?v=xyz" required>
-
-            <label for="option">Selecciona tipo de descarga:</label>
+            <label for="option">Tipo de descarga:</label>
             <select id="option" name="option" required>
-                <option value="audio">Audio (MP3, 320 kbps)</option>
-                <option value="video">Video (MP4 - Máxima calidad disponible)</option>
+                <option value="video">Video (máxima calidad)</option>
+                <option value="audio">Solo audio (MP3)</option>
             </select>
 
             <button type="submit">Descargar</button>
         </form>
     </div>
-
-    <footer>
-        <p>&copy; 2025 Juank Music Oficial</p>
-    </footer>
 </body>
 </html>
