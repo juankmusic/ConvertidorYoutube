@@ -21,6 +21,7 @@ def index():
 def download():
     url = request.form['url']
     option = request.form['option']
+    resolution = request.form.get('resolution', '1080p')  # 1080p, 2k, 4k
 
     try:
         if option == 'audio':
@@ -39,9 +40,15 @@ def download():
                 filename = ydl.prepare_filename(info_dict).replace('.webm', '.mp3').replace('.m4a', '.mp3')
 
         else:
-            # Siempre intentar descargar con alta calidad
+            height_map = {
+                '1080p': '1080',
+                '2k': '1440',
+                '4k': '2160',
+            }
+            max_height = height_map.get(resolution, '1080')
+
             ydl_opts = {
-                'format': 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best',
+                'format': f'bestvideo[ext=mp4][height<={max_height}]+bestaudio[ext=m4a]/best',
                 'ffmpeg_location': ffmpeg_path,
                 'outtmpl': os.path.join(download_folder, '%(title)s.%(ext)s'),
                 'postprocessors': [{
@@ -60,6 +67,5 @@ def download():
         return render_template('index.html')
 
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
