@@ -1,183 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertidor de YouTube</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            height: 100vh;
-            background: linear-gradient(270deg, #0f2027, #203a43, #2c5364);
-            background-size: 600% 600%;
-            animation: gradientBG 15s ease infinite;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #eee;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            box-sizing: border-box;
-        }
-
-        @keyframes gradientBG {
-            0%{background-position:0% 50%}
-            50%{background-position:100% 50%}
-            100%{background-position:0% 50%}
-        }
-
-        .container {
-            background: rgba(20, 20, 20, 0.75);
-            padding: 2rem 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 0 20px #ff0000aa;
-            width: 35%;
-            max-width: 700px;
-            min-width: 280px;
-            text-align: center;
-            box-sizing: border-box;
-        }
-
-        h1 {
-            font-weight: 900;
-            font-size: 2.2rem;
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #ff4444;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                text-shadow: 0 0 5px #ff4444, 0 0 10px #ff4444;
-            }
-            to {
-                text-shadow: 0 0 15px #ff7777, 0 0 30px #ff7777;
-            }
-        }
-
-        p {
-            font-size: 1rem;
-            margin-bottom: 1.2rem;
-            color: #ddd;
-        }
-
-        label {
-            display: block;
-            margin: 1rem 0 0.5rem;
-            font-weight: 600;
-            color: #ccc;
-            text-align: left;
-            font-size: 1rem;
-        }
-
-        input[type="url"], select {
-            width: 100%;
-            height: 50&;
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            border: 2px solid #444;
-            background: #111;
-            color: #eee;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-            box-sizing: border-box;
-        }
-
-        input[type="url"]:focus, select:focus {
-            outline: none;
-            border-color: #ff4444;
-            box-shadow: 0 0 10px #ff4444;
-            background: #222;
-        }
-
-        button {
-            margin-top: 1.8rem;
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #fff;
-            background: #ff4444;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 0 10px #ff4444;
-            transition: background 0.3s, box-shadow 0.3s;
-            width: 100%;
-        }
-
-        button:hover {
-            background: #ff2222;
-            box-shadow: 0 0 20px #ff2222;
-        }
-
-        footer {
-            margin-top: 30px;
-            color: #bbb;
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
-        /* Responsive: ajusta tamaño para pantallas pequeñas */
-        @media (max-width: 720px) {
-            .container {
-                width: 70vw;
-                max-width: 90vw;
-                min-width: 320px;
-                padding: 2rem 1.5rem;
-                margin-left: auto;
-                margin-right: auto;
-                border-radius: 12px;
-                box-shadow: 0 0 12px #ff5555;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            p, label, input, select, button {
-                font-size: 1rem;
-            }
-
-            button {
-                padding: 12px 24px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                width: 85vw;
-                max-width: 95vw;
-                min-width: 300px;
-                border-radius: 10px;
-                box-shadow: 0 0 10px #ff4444;
-                padding: 1.5rem 1.2rem;
-                margin-left: 15px;
-            }
-
-            h1 {
-                font-size: 1.7rem;
-            }
-
-            p, label, input, select, button {
-                font-size: 0.95rem;
-            }
-
-            button {
-                padding: 10px 20px;
-            }
-        }
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JuankTube - Convertidor de YouTube</title>
+    <link rel="stylesheet" href="static/style.css" />
 </head>
 <body>
     <div class="container">
         <h1>JuankTube</h1>
         <p>¡Convierte tu música o vídeo de YouTube en calidad premium, pero gratis😎!</p>
-        <form method="POST" action="/download">
+
+        <form method="POST" action="/download" id="convert-form">
             <label for="url">URL del video:</label>
-            <input type="url" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
+            <input type="url" id="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required />
 
             <label for="option">Tipo de descarga:</label>
             <select id="option" name="option" required>
@@ -185,11 +21,100 @@
                 <option value="audio">Audio (MP3, Máxima Calidad)</option>
             </select>
 
-            <button type="submit">Descargar</button>
+            <button type="submit" id="download-btn">Descargar</button>
         </form>
+
+        <!-- Barra de progreso -->
+        <div id="progress-container" style="display:none; margin-top: 20px;">
+            <div style="background:#444; border-radius: 5px; height: 25px; overflow: hidden;">
+                <div id="progress-bar" style="height: 100%; width: 0%; background:#ff4444; transition: width 0.3s;"></div>
+            </div>
+            <p id="progress-text" style="margin-top: 8px;">Progreso: 0%</p>
+        </div>
+
     </div>
+
     <footer>
         <p>&copy; 2025 Juank Music Oficial</p>
     </footer>
+
+    <script>
+    const form = document.getElementById("convert-form");
+    const downloadBtn = document.getElementById("download-btn");
+    const progressContainer = document.getElementById("progress-container");
+    const progressBar = document.getElementById("progress-bar");
+    const progressText = document.getElementById("progress-text");
+
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        // Deshabilitar botón para evitar doble clic
+        downloadBtn.disabled = true;
+
+        // Mostrar barra y resetear progreso
+        progressContainer.style.display = "block";
+        progressBar.style.width = "0%";
+        progressText.textContent = "Progreso: 0%";
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            if (progress < 99) {
+                progress++;
+                progressBar.style.width = progress + "%";
+                progressText.textContent = `Progreso: ${progress}%`;
+            }
+        }, 100); // Incrementa 1% cada 100ms (~10s hasta 99%)
+
+        const formData = new FormData(form);
+
+        fetch("/download", {
+            method: "POST",
+            body: formData,
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Error en la descarga");
+
+            return response.blob().then(blob => {
+                clearInterval(interval);
+                progress = 100;
+                progressBar.style.width = "100%";
+                progressText.textContent = "¡Completado!";
+
+                // Descargar archivo
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+
+                // Extraer nombre del archivo si existe en headers
+                const contentDisposition = response.headers.get("Content-Disposition");
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="(.+)"/);
+                    if (match) a.download = match[1];
+                }
+
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                // Cambiar texto del botón y habilitar para reiniciar
+                downloadBtn.textContent = "Convertir otro";
+                downloadBtn.disabled = false;
+                downloadBtn.classList.add("convertir-otro");
+            });
+        })
+        .catch(error => {
+            clearInterval(interval);
+            progressText.textContent = "Error: " + error.message;
+            downloadBtn.disabled = false;
+        });
+    });
+
+    downloadBtn.addEventListener("click", function(event) {
+        // Si el botón está en modo "Convertir otro", reiniciar página/formulario
+        if (downloadBtn.textContent === "Convertir otro") {
+            event.preventDefault();
+            window.location.reload();
+        }
+    });
+    </script>
 </body>
 </html>
