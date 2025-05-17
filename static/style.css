@@ -147,10 +147,12 @@ footer {
 
     h1 {
         font-size: 2rem;
+        font-family: 'Gotham';
     }
 
     p, label, input, select, button {
         font-size: 1rem;
+        font-family: 'Gotham';
     }
 
     button {
@@ -171,10 +173,12 @@ footer {
 
     h1 {
         font-size: 1.7rem;
+        font-family: 'Gotham';
     }
 
     p, label, input, select, button {
         font-size: 0.95rem;
+        font-family: 'Gotham';
     }
 
     button {
